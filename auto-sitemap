@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+outfile=sitemap.xml
+url=
+prog=$0
+careful=0
+find_switches=
+
+function halp {
+    echo "Usage:"
+    echo "  $prog [-h] [-f <switches-for-find>] [-o <output>] -u <site-url>"
+    echo "Example:"
+    echo "  $prog -o sitemap.xml -u http://example.com/  #trailing slash is important"
+}
+
+while getopts h:o:u:f opt; do
+    case $opt in
+        o)
+            outfile=$OPTARG
+            careful=1
+            ;;
+        u)
+            url=$OPTARG
+            ;;
+        f)
+            find_switches=$OPTARG
+            ;;
+        h)
+            halp
+            exit
+            ;;
+    esac
+done
+
+
+if [[ -z "$outfile" ]] || [[ -z "$url" ]] ; then
+    echo $url
+    halp
+fi
+
+tmp=$outfile
+inc=1
+
+while [[ -f $outfile && "$careful" == "0" ]]
+do
+    outfile=$tmp.$inc
+    inc=$(($inc+1))
+done
+
+touch $outfile
+
+function start_map {
+    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" >> $outfile
+    echo "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">" >> $outfile
+}
+function add_loc {
+    echo "<url>" >> $outfile
+    echo " <loc>$url$1</loc>" >> $outfile
+    echo " <lastmod>$(date +\"%Y-%m-%d\")</lastmod>" >> $outfile
+    echo " <changefreq>monthly</changefreq>" >> $outfile
+    echo " <priority>0.5</priority>" >> $outfile
+    echo "</url>" >> $outfile
+}
+function end_map {
+    echo "</urlset>" >> $outfile
+}
+
+start_map
+
+files=$(find $find_switches -type f)
+
+for f in $files ; do
+    loc="${f:2:${#f}}"
+    add_loc "$loc"
+done
+
+end_map
