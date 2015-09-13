@@ -13,7 +13,7 @@ function halp {
     echo "  $prog -o sitemap.xml -u http://example.com/  #trailing slash is important"
 }
 
-while getopts h:o:u:f opt; do
+while getopts ho:u:f opt; do
     case $opt in
         o)
             outfile=$OPTARG
