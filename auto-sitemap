@@ -34,8 +34,8 @@ done
 
 
 if [[ -z "$outfile" ]] || [[ -z "$url" ]] ; then
-    echo $url
     halp
+    exit
 fi
 
 tmp=$outfile
